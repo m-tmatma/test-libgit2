@@ -9,12 +9,9 @@ platform:
   - Win32
   - x64
 
-install:
-- cmd: >-
-    git submodule init
-    git submodule update
-
 build_script:
 - cmd: |
+    git submodule init
+    git submodule update
     create-project.bat %PLATFORM% %CONFIGURATION%
     build-project.bat  %PLATFORM% %CONFIGURATION%
