@@ -30,6 +30,7 @@ static void revwalking(git_repository *repo, const char * commithash)
 	git_revwalk *walk;
 	git_commit *wcommit;
 	git_oid oid;
+	char oid_hex[GIT_OID_HEXSZ+1];
 
 	printf("\n*Revwalking*\n");
 
@@ -45,11 +46,27 @@ static void revwalking(git_repository *repo, const char * commithash)
 		error = git_commit_lookup(&wcommit, repo, &oid);
 		check_error(error, "looking up commit during revwalk");
 
+		git_oid_fmt(oid_hex, git_commit_id(wcommit));
 		cmsg  = git_commit_message(wcommit);
 		cauth = git_commit_author(wcommit);
 		printf("%s (%s)\n", cmsg, cauth->email);
 
-		git_commit_free(wcommit);
+		printf("---- %s ----\n", oid_hex);
+		{
+			unsigned int parents, p;
+			git_commit *parent;
+			parents  = git_commit_parentcount(wcommit);
+			for (p = 0;p < parents;p++) {
+				memset(oid_hex, 0, sizeof(oid_hex));
+
+				git_commit_parent(&parent, wcommit, p);
+				git_oid_fmt(oid_hex, git_commit_id(parent));
+				printf("Parent: %s\n", oid_hex);
+				git_commit_free(parent);
+			}
+			git_commit_free(wcommit);
+		}
+		printf("\n");
 	}
 // Like the other objects, be sure to free the revwalker when you're done to prevent memory leaks. Also, make sure that the repository being walked it not deallocated while the walk is in progress, or it will result in undefined behavior
 
