@@ -1,0 +1,10 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+
+
+install:
+  - cmd: git submodule init
+  - cmd: git submodule update
+
+build_script:
+  - cmd: build.bat
