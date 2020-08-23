@@ -47,6 +47,8 @@ static void revwalking(git_repository *repo, const char * commithash)
 		check_error(error, "looking up commit during revwalk");
 
 		git_oid_fmt(oid_hex, git_commit_id(wcommit));
+		oid_hex[GIT_OID_HEXSZ] = '\0';
+
 		cmsg  = git_commit_message(wcommit);
 		cauth = git_commit_author(wcommit);
 		printf("%s (%s)\n", cmsg, cauth->email);
@@ -61,6 +63,8 @@ static void revwalking(git_repository *repo, const char * commithash)
 
 				git_commit_parent(&parent, wcommit, p);
 				git_oid_fmt(oid_hex, git_commit_id(parent));
+				oid_hex[GIT_OID_HEXSZ] = '\0';
+
 				printf("Parent: %s\n", oid_hex);
 				git_commit_free(parent);
 			}
