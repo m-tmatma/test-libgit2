@@ -34,13 +34,21 @@ static void revwalking(git_repository *repo, const char * commithash)
 
 	printf("\n*Revwalking*\n");
 
-	git_oid_fromstr(&oid, commithash);
 
 // To use the revwalker, create a new walker, tell it how you want to sort the output and then push one or more starting points onto the walker. If you want to emulate the output of git log you would push the SHA of the commit that HEAD points to into the walker and then start traversing them. You can also 'hide' commits that you want to stop at or not see any of their ancestors. So if you want to emulate git log branch1..branch2, you would push the oid of branch2 and hide the oid of branch1.
 
 	git_revwalk_new(&walk, repo);
 	git_revwalk_sorting(walk, GIT_SORT_TOPOLOGICAL | GIT_SORT_REVERSE);
-	git_revwalk_push(walk, &oid);
+	
+	if (commithash)
+	{
+		git_oid_fromstr(&oid, commithash);
+		git_revwalk_push(walk, &oid);
+	}
+	else
+	{
+		git_revwalk_push_head(walk);
+	}
 
 	while ((git_revwalk_next(&oid, walk)) == 0) {
 		error = git_commit_lookup(&wcommit, repo, &oid);
@@ -88,15 +96,21 @@ void show_revwalking(const char * repo_path, const char * commithash)
 
 int main(int argc, char * argv[])
 {
-	if (argc != 3)
+	if (argc != 3 && argc != 2)
 	{
 		printf("usage: %s <repo_path> <commitHash>\n", argv[0]);
+		printf("usage: %s <repo_path>\n", argv[0]);
 		return 1;
 	}
 	
 	char * repo_path = argv[1];
-	char * commitHash= argv[2];
+	char * commitHash= NULL;
 	
+	if (argc == 3 )
+	{
+		commitHash= argv[2];
+	}
+
 	git_libgit2_init();
 	show_revwalking(repo_path, commitHash);
 	git_libgit2_shutdown();
